@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="LnbbaApp">
+<head>
+    <!-- Required meta tags always come first -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="css/app.css"/>
+</head>
+<body>
+<div class="container" ng-controller="LnbbaCtrl" style="margin: 30px;">
+    <div ng-show="!loggedIntoGoogle" class="center"><button ng-click="login()" class="btn btn-primary">Login To Google</button></div>
+    <!--<div ng-show="loggedIntoGoogle">Choose your calendar: <select ng-model="selectedCalendar" ng-options="calendar.summary for calendar in calendars"></select></div>-->
+
+
+    <div ng-show="loggedIntoGoogle">
+        <!--<button ng-click="updateAllCalendarNames()" class="btn btn-primary pull-right">Update Calendar Names</button>-->
+        <button ng-click="updateEventNames()" class="btn btn-primary pull-right">Update Event Names</button>
+        <div class="row">
+            <div class="col-xs-12">
+                <ul>
+                    <li><input type="checkbox" name="calendarIds" ng-click="checkEmAll($event)"/></li>
+                    <li ng-repeat="calendar in calendars | orderBy: 'summary'"><input type="checkbox" name="calendarIds" ng-model="calendarIds" ng-value="calendar.id"/> <span ng-bind="calendar.summary"></span> <span ng-bind="calendar.color"></span></li>
+                </ul>
+                <button ng-click="generateLink()" class="btn btn-primary">Generate Link</button>
+                <input type="text" class="form-control" ng-model="generatedLink"/>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <textarea id="quickadd" name="quickadd" class="form-control" style="height:300px;" ng-model="quickAddText"></textarea>
+                <button ng-click="quickAdd()" class="btn btn-primary">Quick Add</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <pre id="output" ng-bind="logText"></pre>
+            </div>
+        </div>
+        [{{ eventCreationError }}]
+    </div>
+</div>
+
+<!-- jQuery first, then Bootstrap JS. -->
+<script src="bower_components/lodash/lodash.js"></script>
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/angular/angular.min.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
+<script src="bower_components/angular-animate/angular-animate.min.js"></script>
+<script src="bower_components/angular-googleapi/src/angular-googleapi.js"></script>
+<script src="bower_components/moment/min/moment-with-locales.js"></script>
+<script src="js/app.js"></script>
+<script>
+    function googleClientLoaded() {
+        gapi.auth.init(function () { });
+    }
+</script>
+<script src="https://apis.google.com/js/client.js?onload=googleClientLoaded"></script>
+</body>
+</html>
