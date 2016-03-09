@@ -39,6 +39,11 @@
             $scope.logText += '\n' + string;
         };
 
+        $scope.textOutput = "";
+        var appendToTextOutput = function (string) {
+            $scope.textOutput += '\n' + string;
+        };
+
         $scope.login = function () {
             googleLogin.login().then(function(result) { }, function() { console.error("failed login")});
         };
@@ -127,6 +132,65 @@
             $('input:checkbox').attr('checked', event.currentTarget.checked);
         };
 
+        $scope.exportOpenTimes = function () {
+            $scope.displayEvents = [];
+            $scope.displayQuickAdd = false;
+            $scope.displaySportNginExport = false;
+            $scope.displayOpenTimesExport = true;
+
+            googleCalendar.listEvents({
+                'calendarId': 'lakevillebbschedule@gmail.com',
+                'timeMin': (new Date()).toISOString(),
+                'showDeleted': false,
+                'singleEvents': true,
+                'orderBy': 'startTime'
+
+            }).then(function (events) {
+                console.log("event : %o", events);
+                _.each(events, function (event) {
+                    $scope.displayEvents.push(event);
+                });
+            });
+        };
+        $scope.exportToSportNgin = function () {
+            $scope.displayEvents = [];
+            $scope.displayQuickAdd = false;
+            $scope.displaySportNginExport = true;
+            $scope.displayOpenTimesExport = false;
+
+            googleCalendar.listCalendars().then(function(cals) {
+                _.each(cals, function (cal) {
+                    if (cal.summary.indexOf('lakevillebbschedule') == -1) {
+
+                        googleCalendar.listEvents({
+                            'calendarId': cal.id,
+                            'timeMin': (new Date()).toISOString(),
+                            'showDeleted': false,
+                            'singleEvents': true,
+                            'orderBy': 'startTime'
+
+                        }).then(function (events) {
+                            console.log("events : %o", events);
+                            _.each(events, function (event) {
+                                $scope.displayEvents.push(event);
+                            });
+
+                        });
+                    }
+                });
+            });
+
+        };
+
+        $scope.exportData = function (tableId) {
+            var blob = new Blob([document.getElementById(tableId).innerHTML], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8"
+            });
+            saveAs(blob, "lakeville_schedule_export.xls");
+        };
+        $scope.displayQuickAdd = true;
+        $scope.displaySportNginExport = false;
+        $scope.displayOpenTimesExport = false;
 
     });
 

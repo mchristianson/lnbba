@@ -4,3 +4,7 @@ ul {
 li {
     margin: 3px;
 }
+
+.box-header .btn {
+    margin-left: 10px;
+}

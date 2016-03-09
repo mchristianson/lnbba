@@ -19,6 +19,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/AdminLTE.min.css">
     <link rel="stylesheet" href="dist/css/skins/skin-red.min.css">
+    <link rel="stylesheet" href="css/app.css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -130,6 +131,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <li class="header">OPTIONS</li>
             <!-- Optionally, you can add icons to the links -->
             <li><a href="#" ng-click="updateEventNames()"><i class="fa fa-refresh"></i> <span>Update Events</span></a></li>
+            <li><a href="#" ng-click="exportOpenTimes()"><i class="fa fa-share"></i> <span>Export Open Times</span></a></li>
+            <li><a href="#" ng-click="exportToSportNgin()"><i class="fa fa-futbol-o"></i> <span>Export to Sport Ngin</span></a></li>
             <li><a target="_blank" href="https://calendar.google.com/calendar/"><i class="fa fa-calendar"></i> <span>View Calendar</span></a></li>
             <li><a target="_blank" href="https://calendar.google.com/calendar/embedhelper?src=lakevillebbschedule%40gmail.com&ctz=America/Chicago"><i class="fa fa-calendar-check-o"></i> <span>Calendar Embed</span></a></li>
             <li><a target="_blank" href="https://www.gcal2excel.com/exporter#template"><i class="fa fa-file-excel-o"></i> <span>Calendar To Excel</span></a></li>
@@ -143,7 +146,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <!-- Content Wrapper. Contains page content -->
       <div class="content-wrapper">
         <!-- Content Header (Page header) -->
-        <section class="content-header">
+        <section class="content-header" ng-show="!!displayQuickAdd">
             <div class="box box-primary">
                 <div class="box-header with-border">
                     <h3 class="box-title">Quick Add</h3>
@@ -153,7 +156,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     <div class="box-body">
                         <div class="form-group">
                             <label for="quickadd">Each line is separate calendar entry</label>
-                            <textarea id="quickadd" name="quickadd" class="form-control" style="height:500px;" ng-model="quickAddText"></textarea>
+                            <textarea id="quickadd" name="quickadd" class="form-control" style="height:300px;" ng-model="quickAddText"></textarea>
                         </div>
                     </div><!-- /.box-body -->
 
@@ -165,11 +168,94 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
         </section>
 
-        <!-- Main content -->
-        <section class="content">
-            <pre id="output" ng-bind="logText"></pre>
+          <section class="content-header" ng-show="!!displaySportNginExport">
+              <div class="box box-primary">
+                  <div class="box-header with-border">
+                      <h3 class="box-title">Sport Ngin Export</h3>
+                      <button class="btn btn-success pull-right" ng-click="exportData('sport-ngin-table')">Export .xls</button>
+                      <button class="btn btn-default pull-right" ng-click="displayEvents = [];">Clear</button>
+                  </div><!-- /.box-header -->
+                  <div id="sport-ngin-table">
+                      <table class="table table-striped">
+                          <thead>
+                          <tr>
+                              <th>Start_Date_Time</th>
+                              <th>End_Date_Time</th>
+                              <th>Title</th>
+                              <th>Location</th>
+                              <th>Team1_ID</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          <tr ng-repeat="event in displayEvents">
+                              <td ng-bind="event.start.dateTime | date: 'MM/dd/yyyy h:mm a'"></td>
+                              <td ng-bind="event.end.dateTime | date: 'MM/dd/yyyy h:mm a'"></td>
+                              <td ng-bind="event.summary"></td>
+                              <td ng-bind="event.location"></td>
+                              <td ng-bind="event.description"></td>
+                          </tr>
+                          </tbody>
+                      </table>
+                </div>
+              </div>
 
-        </section><!-- /.content -->
+          </section>
+          <section class="content-header" ng-show="!!displayOpenTimesExport">
+              <div class="box box-primary">
+                  <div class="box-header with-border">
+                      <h3 class="box-title">Open Times Export </h3>
+                      <button class="btn btn-success pull-right" ng-click="exportData('open-times-table')">Export .xls</button>
+                      <button class="btn btn-default pull-right" ng-click="displayEvents = [];">Clear</button>
+                  </div><!-- /.box-header -->
+                  <div id="open-times-table">
+                      <table class="table table-striped">
+                          <thead>
+                          <tr>
+                              <th>Gym</th>
+                              <th>Date</th>
+                              <th>Start</th>
+                              <th>End</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          <tr ng-repeat="event in displayEvents">
+                              <td ng-bind="event.summary"></td>
+                              <td ng-bind="event.start.dateTime | date: 'EEEE, MMMM dd, yyyy'"></td>
+                              <td ng-bind="event.start.dateTime | date: 'h:mm a'"></td>
+                              <td ng-bind="event.end.dateTime | date: 'h:mm a'"></td>
+                          </tr>
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+
+          </section>
+
+          <!-- Main content -->
+          <section class="content">
+              <label for="output">Log</label>
+              <pre id="output" ng-bind="logText"></pre>
+
+          </section><!-- /.content -->
+
+          <section class="content-header" ng-show="textOutput !== ''">
+              <div class="box box-primary">
+                  <div class="box-header with-border">
+                      <h3 class="box-title">Text Output <button class="btn btn-default" ng-click="textOutput = '';">Clear</button></h3>
+                  </div><!-- /.box-header -->
+                  <!-- form start -->
+                  <form role="form">
+                      <div class="box-body">
+                          <div class="form-group">
+                              <textarea id="textOutput" ng-bind="textOutput" class="form-control" style="height:150px;"></textarea>
+                          </div>
+                      </div><!-- /.box-body -->
+
+                  </form>
+              </div>
+
+          </section>
+
       </div><!-- /.content-wrapper -->
 
       <!-- Main Footer -->
@@ -179,7 +265,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           Anything you want
         </div>
         <!-- Default to the left -->
-        <strong>Copyright &copy; 2016 <a href="#">Sock Monkey Development</a>.</strong> All rights reserved.
+        <strong>Copyright &copy; 2016 <a href="http://sockmonkey.smd-test.com/">Sock Monkey Development</a>.</strong> All rights reserved.
       </footer>
 
       <!-- Add the sidebar's background. This div must be placed
@@ -198,6 +284,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="bower_components/angular-googleapi/src/angular-googleapi.js"></script>
     <script src="bower_components/moment/min/moment-with-locales.js"></script>
     <script src="dist/js/app.js"></script>
+    <script src="js/fileSaver.js"></script>
     <script src="js/app.js"></script>
     <script>
       function googleClientLoaded() {
