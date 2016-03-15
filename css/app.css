@@ -8,3 +8,14 @@ li {
 .box-header .btn {
     margin-left: 10px;
 }
+
+.skin-red .sidebar-menu>li.active>a {
+    background-color: #343E42;
+}
+li>a .only-link {
+    display: none;
+}
+li>a:hover .only-link {
+    display: inline-block;
+    color: #ccc;
+}

@@ -22,6 +22,7 @@
 
         $scope.quickAddText = "Monday, 3/14 LNHS South Gym      6:30 to 8:00pm";
 
+
         var locations = $scope.locations = [
             {
                 name: 'LNHS South Gym',
@@ -103,11 +104,17 @@
         });
 
         $scope.$on("googleCalendar:loaded", function() {
-            appendToLog("Ready...")
+            appendToLog("Ready...");
+            $scope.loadCalendars();
         });
 
         $scope.loadCalendars = function() {
-            this.calendars = googleCalendar.listCalendars();
+            this.calendars = googleCalendar.listCalendars().then(function (cals) {
+                _.each(cals, function (cal) {
+                    appendToLog(cal.summary + ' ' + cal.id);
+                });
+                console.log("cals : %o", cals);
+            });
         };
 
         $scope.updateEventNames = function () {
@@ -287,7 +294,7 @@
             saturday = moment().day($scope.week + 6).format('YYYYMMDD'),
             datesParam = '&dates=' + sunday + '%2F' + saturday;
 
-        $scope.nextWeekSchedule = 'https://calendar.google.com/calendar/embed?title=Lakeville%20North%20Basketball%20Schedule&mode=WEEK&height=600&wkst=1&bgcolor=%23FFFFFF&src=lakevillebbschedule%40gmail.com&color=%23ffffff&src=175th89oaa2jv895lhvr901l5c%40group.calendar.google.com&color=%232F6309&src=7sg33utncqffm35mprq106p50k%40group.calendar.google.com&color=%236B3304&src=g6lccaup2fqmnne5velmn1h06c%40group.calendar.google.com&color=%23AB8B00&src=8m1rb8je401jtajnp48inalqak%40group.calendar.google.com&color=%2328754E&src=0n31vkpkpo5arg2hb43use6nps%40group.calendar.google.com&color=%235F6B02&src=6u1bif4vfi2531o53vrq5hte20%40group.calendar.google.com&color=%2328754E&src=uapge6e7ktifet5o6n5cd6lj58%40group.calendar.google.com&color=%238D6F47&src=6839kiho0o4v334p42tmkevar4%40group.calendar.google.com&color=%23125A12&src=usoanmeifcgf210p481l9td4g4%40group.calendar.google.com&color=%23875509&src=v75qgghiakpuo1l31valcnuk04%40group.calendar.google.com&color=%2323164E&src=7fj0hi35sdrgceo84gu22g3qlc%40group.calendar.google.com&color=%235229A3&src=j74lst0uve4ma8m0rt3ip20ee8%40group.calendar.google.com&color=%23AB8B00&ctz=America%2FChicago' + datesParam;
+        $scope.nextWeekSchedule = 'https://calendar.google.com/calendar/embed?title=Lakeville%20North%20Basketball%20Schedule&mode=WEEK&height=600&wkst=1&bgcolor=  #FFFFFF&src=lakevillebbschedule%40gmail.com&color=  #ffffff&src=175th89oaa2jv895lhvr901l5c%40group.calendar.google.com&color=  #2F6309&src=7sg33utncqffm35mprq106p50k%40group.calendar.google.com&color=  #6B3304&src=g6lccaup2fqmnne5velmn1h06c%40group.calendar.google.com&color=  #AB8B00&src=8m1rb8je401jtajnp48inalqak%40group.calendar.google.com&color=  #28754E&src=0n31vkpkpo5arg2hb43use6nps%40group.calendar.google.com&color=  #5F6B02&src=6u1bif4vfi2531o53vrq5hte20%40group.calendar.google.com&color=  #28754E&src=uapge6e7ktifet5o6n5cd6lj58%40group.calendar.google.com&color=  #8D6F47&src=6839kiho0o4v334p42tmkevar4%40group.calendar.google.com&color=  #125A12&src=usoanmeifcgf210p481l9td4g4%40group.calendar.google.com&color=  #875509&src=v75qgghiakpuo1l31valcnuk04%40group.calendar.google.com&color=  #23164E&src=7fj0hi35sdrgceo84gu22g3qlc%40group.calendar.google.com&color=  #5229A3&src=j74lst0uve4ma8m0rt3ip20ee8%40group.calendar.google.com&color=  #AB8B00&ctz=America%2FChicago' + datesParam;
 
         $scope.exportData = function (tableId) {
             var blob = new Blob([document.getElementById(tableId).innerHTML], {
@@ -309,6 +316,70 @@
             $scope.displayPage[pageName] = true;
         };
 
+        var calendar = $('#calendar');
+
+        $scope.allCalendars = [
+            {  summary: '1 WOTN', googleCalendarId: '175th89oaa2jv895lhvr901l5c@group.calendar.google.com', color: '#2F6309', visible: true},
+            {  summary: 'Open', googleCalendarId: 'lakevillebbschedule@gmail.com', color: '#eeeeee', visible: true},
+            {  summary: '4B Heggen', googleCalendarId: '0n31vkpkpo5arg2hb43use6nps@group.calendar.google.com', color: '#5F6B02', visible: true},
+            {  summary: '6C Hunhoff', googleCalendarId: 'v75qgghiakpuo1l31valcnuk04@group.calendar.google.com', color: '#23164E', visible: true},
+            {  summary: '6A Winter', googleCalendarId: '6839kiho0o4v334p42tmkevar4@group.calendar.google.com', color: '#125A12', visible: true},
+            {  summary: '8BB (Black) Lang', googleCalendarId: '7fj0hi35sdrgceo84gu22g3qlc@group.calendar.google.com', color: '#dd8899', visible: true},
+            {  summary: '3A Kohlander', googleCalendarId: '7sg33utncqffm35mprq106p50k@group.calendar.google.com', color: '#6B3304', visible: true},
+            {  summary: '4A Christianson', googleCalendarId: '8m1rb8je401jtajnp48inalqak@group.calendar.google.com', color: '#28754E', visible: true},
+            {  summary: '6B Falter', googleCalendarId: 'usoanmeifcgf210p481l9td4g4@group.calendar.google.com', color: '#875509', visible: true},
+            {  summary: '3G Johnson', googleCalendarId: 'g6lccaup2fqmnne5velmn1h06c@group.calendar.google.com', color: '#AB8B00', visible: true},
+            {  summary: '5C Angell', googleCalendarId: 'uapge6e7ktifet5o6n5cd6lj58@group.calendar.google.com', color: '#8D6F47', visible: true},
+            {  summary: '5 Wheatcraft', googleCalendarId: '6u1bif4vfi2531o53vrq5hte20@group.calendar.google.com', color: '#28754E', visible: true},
+            {  summary: '8BR (Red) Hernandez', googleCalendarId: 'j74lst0uve4ma8m0rt3ip20ee8@group.calendar.google.com', color: '#5229A3', visible: true}
+         ];
+        var visibleCalendars = _.pick( $scope.allCalendars, 'googleCalendarId');
+
+        $scope.toggleCalendar = function (cal) {
+            cal.visible = !cal.visible;
+            if (!!cal.visible) {
+                calendar.fullCalendar('addEventSource',  cal);
+            } else {
+                calendar.fullCalendar('removeEventSource',  cal);
+            }
+
+        };
+        $scope.initCalendarView = function () {
+            calendar.fullCalendar({
+                googleCalendarApiKey: 'AIzaSyB3ry0B-bKSXl45V29ac1bferwySUC8d80',
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                defaultView: 'agendaWeek',
+                buttonText: {
+                    today: 'today',
+                    month: 'month',
+                    week: 'week',
+                    day: 'day'
+                },
+                eventSources: $scope.allCalendars
+            });
+        };
+        $scope.showOnly = function (cal) {
+            _.each($scope.allCalendars, function (theCal) {
+                theCal.visible = false;
+                calendar.fullCalendar('removeEventSource',  theCal);
+            });
+            cal.visible = true;
+            calendar.fullCalendar('addEventSource',  cal);
+        };
+
+        $scope.isCalActive = function (calId) {
+            return (visibleCalendars.indexOf(calId) > -1);
+        }
     });
+    var removeFromArray = function (array, item) {
+        var i = array.indexOf(item);
+        if(i != -1) {
+            array.splice(i, 1);
+        }
+    };
 
 })();

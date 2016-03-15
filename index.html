@@ -19,6 +19,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Theme style -->
     <link rel="stylesheet" href="dist/css/AdminLTE.min.css">
     <link rel="stylesheet" href="dist/css/skins/skin-red.min.css">
+    <link rel="stylesheet" href="bower_components/fullcalendar/dist/fullcalendar.css">
     <link rel="stylesheet" href="css/app.css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -28,20 +29,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 </head>
-<body class="hold-transition skin-red sidebar-mini" ng-controller="LnbbaCtrl">
-<div class="login-box" ng-show="!loggedIntoGoogle" ng-cloak>
-    <div class="login-logo">
-        <a href="#">Lakeville North Basketball Scheduler</a>
-    </div><!-- /.login-logo -->
-    <div class="login-box-body">
-        <div class="social-auth-links text-center">
-            <a ng-click="login()" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i>
-                Sign in using Google+</a>
-        </div><!-- /.social-auth-links -->
-
-    </div><!-- /.login-box-body -->
-</div><!-- /.login-box -->
-<div class="wrapper" ng-show="!!loggedIntoGoogle" ng-cloak>
+<body class="hold-transition skin-red sidebar-mini" ng-controller="LnbbaCtrl" ng-init="initCalendarView()">
+<div class="wrapper">
 
     <!-- Main Header -->
     <header class="main-header">
@@ -65,46 +54,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
                         <!-- Menu Toggle Button -->
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                             <!-- The user image in the navbar-->
-                            <img ng-src="{{ currentUser.image.url }}" class="user-image" alt="User Image">
-                            <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                            <span class="hidden-xs" ng-bind="currentUser.displayName"></span>
+                            <img ng-src="https://lh3.googleusercontent.com/-m_jamRWlKsw/AAAAAAAAAAI/AAAAAAAAAAs/-6ZZipILgRA/photo.jpg?sz=50" class="user-image" alt="User Image">
                         </a>
-                        <ul class="dropdown-menu">
-                            <!-- The user image in the menu -->
-                            <li class="user-header">
-                                <img ng-src="{{ currentUser.image.url }}" class="img-circle" alt="User Image">
-                                <p>
-                                    Matt Christianson - Web Developer
-                                    <small>Member since Nov. 2012</small>
-                                </p>
-                            </li>
-                            <!-- Menu Body -->
-                            <li class="user-body">
-                                <div class="col-xs-4 text-center">
-                                    <a href="#">Followers</a>
-                                </div>
-                                <div class="col-xs-4 text-center">
-                                    <a href="#">Sales</a>
-                                </div>
-                                <div class="col-xs-4 text-center">
-                                    <a href="#">Friends</a>
-                                </div>
-                            </li>
-                            <!-- Menu Footer-->
-                            <li class="user-footer">
-                                <div class="pull-left">
-                                    <a href="#" class="btn btn-default btn-flat">Profile</a>
-                                </div>
-                                <div class="pull-right">
-                                    <a href="#" class="btn btn-default btn-flat">Sign out</a>
-                                </div>
-                            </li>
-                        </ul>
                     </li>
                     <!-- Control Sidebar Toggle Button -->
-                    <li>
-                        <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
-                    </li>
                 </ul>
             </div>
         </nav>
@@ -114,61 +67,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
         <!-- sidebar: style can be found in sidebar.less -->
         <section class="sidebar">
-
-            <!-- Sidebar user panel (optional) -->
-            <div class="user-panel">
-                <div class="pull-left image">
-                    <img ng-src="{{ currentUser.image.url }}" class="img-circle" alt="User Image">
-                </div>
-                <div class="pull-left info">
-                    <p ng-bind="currentUser.displayName"></p>
-                    <!-- Status -->
-                </div>
-            </div>
-
-
             <!-- Sidebar Menu -->
             <ul class="sidebar-menu">
-                <li class="header">OPTIONS</li>
+                <li class="header">CALENDARS</li>
                 <!-- Optionally, you can add icons to the links -->
-                <li class="treeview">
-                    <a href="#"><i class="fa fa-fighter-jet"></i> <span>Quick Add</span><i class="fa fa-angle-left pull-right"></i></a>
-                    <ul class="treeview-menu">
-                        <li ng-class="{'active' : !!displayQuickAdd}"><a href="#" ng-click="changePage('quickAdd')"><i
-                                class="fa fa-table"></i> <span>Quick Add Form</span></a></li>
-                        <li><a target="_blank"
-                               href="https://docs.google.com/spreadsheets/d/1LOuCHk-DgDQRioZmponalhGpPLQljTKJeOcmWST4pHI/edit#gid=0"><i
-                                class="fa fa-file-excel-o"></i> <span>Quick Add Spreadsheet</span></a></li>
-                    </ul>
-                </li>
-                <li class="trueeview">
-                    <a href="#"><i class="fa fa-file-excel-o"></i><span>Export Data</span><i class="fa fa-angle-left pull-right"></i></a>
-                    <ul class="treeview-menu">
-                        <li ng-class="{'active' : !!displayPage.openTimes}"><a href="#" ng-click="exportOpenTimes()"><i
-                                class="fa fa-clock-o"></i> <span>Export Open Times</span></a></li>
-                        <li ng-class="{'active' : !!displayPage.fullSchedule}"><a href="#" ng-click="exportFullSchedule()"><i
-                                class="fa fa-calendar"></i> <span>Export Full Schedule</span></a></li>
-                        <li ng-class="{'active' : !!displayPage.sportNgin}"><a href="#" ng-click="exportToSportNgin()"><i
-                                class="fa fa-futbol-o"></i> <span>Export to Sport Ngin</span></a></li>
-                    </ul>
+                <li ng-repeat="cal in allCalendars | orderBy: 'summary'" ng-class="{'active' : cal.visible}">
+                    <a href="#" ng-click="toggleCalendar(cal)">
+                        <i class="fa fa-calendar"  style="color: {{ cal.color }}"></i>
+                        <span ng-bind="cal.summary"></span>
+                        <span class="pull-right only-link" ng-click="showOnly(cal)">only</span>
+                    </a>
                 </li>
 
-                <li><a href="#" ng-click="updateEventNames()"><i class="fa fa-refresh"></i>
-                    <span>Update Events</span></a></li>
-                <li><a target="_blank" href="https://calendar.google.com/calendar/"><i class="fa fa-calendar"></i>
-                    <span>View Calendar</span></a></li>
-                <li><a target="_blank" ng-href="{{ nextWeekSchedule }}"><i class="fa fa-calendar-check-o"></i> <span>Next Week Calendar</span></a></li>
-                <li><a target="_blank"
-                       href="https://calendar.google.com/calendar/embedhelper?src=lakevillebbschedule%40gmail.com&ctz=America/Chicago"><i
-                        class="fa fa-print"></i> <span>Calendar Embed</span></a></li>
-                <li><a target="_blank" href="https://www.gcal2excel.com/exporter#template"><i
-                        class="fa fa-file-excel-o"></i> <span>Calendar To Excel</span></a></li>
-                <li><a target="_blank"
-                       href="https://docs.google.com/spreadsheets/d/1GrQ0EEMbb5ztkDNHivkWwfQtwCb-pE2J-jWgjEcJvxg/edit#gid=0"><i
-                        class="fa fa-asterisk"></i> <span>Special Requests</span></a></li>
-                <li><a target="_blank"
-                       href="https://docs.google.com/document/d/1cxu33Siud7L03lOPrk3LPcYOSCnRPg_oF0L1Ihdn_Ik/edit#heading=h.de4u357wg3av"><i
-                        class="fa fa-graduation-cap"></i> <span>Instructions</span></a></li>
             </ul><!-- /.sidebar-menu -->
         </section>
         <!-- /.sidebar -->
@@ -177,154 +87,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
-        <section class="content-header" ng-show="!!displayPage.quickAdd">
+        <section class="content-header">
             <div class="box box-primary">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Quick Add</h3>
+                    <h3 class="box-title">Lakeville North Basketball Schedule</h3>
                 </div><!-- /.box-header -->
-                <!-- form start -->
-                <form role="form">
-                    <div class="box-body">
-                        <div class="form-group">
-                            <label for="quickadd">Each line is separate calendar entry</label>
-                            <textarea id="quickadd" name="quickadd" class="form-control" style="height:300px;"
-                                      ng-model="quickAddText"></textarea>
-                        </div>
-                    </div><!-- /.box-body -->
-
-                    <div class="box-footer">
-                        <button ng-click="quickAdd()" type="submit" class="btn btn-primary">Quick Add</button>
-                    </div>
-                </form>
+                <div id="calendar"></div>
             </div>
 
         </section>
 
-        <section class="content-header" ng-show="!!displayPage.sportNgin">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Sport Ngin Export</h3>
-                    <button class="btn btn-success pull-right" ng-click="exportData('sport-ngin-table')">Export .xls
-                    </button>
-                    <button class="btn btn-default pull-right" ng-click="displayEvents = [];">Clear</button>
-                </div><!-- /.box-header -->
-                <div id="sport-ngin-table">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>Start_Date_Time</th>
-                            <th>End_Date_Time</th>
-                            <th>Title</th>
-                            <th>Location</th>
-                            <th>Team1_ID</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="event in displayEvents">
-                            <td ng-bind="event.start.dateTime | date: 'MM/dd/yyyy h:mm a'"></td>
-                            <td ng-bind="event.end.dateTime | date: 'MM/dd/yyyy h:mm a'"></td>
-                            <td ng-bind="event.summary"></td>
-                            <td ng-bind="event.location"></td>
-                            <td ng-bind="event.description"></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </section>
-        <section class="content-header" ng-show="!!displayPage.openTimes">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Open Times Export </h3>
-                    <button class="btn btn-success pull-right" ng-click="exportData('open-times-table')">Export .xls
-                    </button>
-                    <button class="btn btn-default pull-right" ng-click="displayEvents = [];">Clear</button>
-                </div><!-- /.box-header -->
-                <div id="open-times-table">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>Gym</th>
-                            <th>Date</th>
-                            <th>Start</th>
-                            <th>End</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="event in displayEvents">
-                            <td ng-bind="event.summary"></td>
-                            <td ng-bind="event.start.dateTime | date: 'EEEE, MMMM dd, yyyy'"></td>
-                            <td ng-bind="event.start.dateTime | date: 'h:mm a'"></td>
-                            <td ng-bind="event.end.dateTime | date: 'h:mm a'"></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </section>
-
-        <section class="content-header" ng-show="!!displayPage.fullSchedule">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Full Schedule Export </h3>
-                    <a class="fa fa-chevron-left" ng-click="previousWeek(exportFullSchedule);"></a><span class="">March 13 - March 20</span><a class="fa fa-chevron-right" ng-click="nextWeek(exportFullSchedule);"></a>
-                    <button class="btn btn-success pull-right" ng-click="exportData('full-schedule-table')">Export .xls
-                    </button>
-                    <button class="btn btn-default pull-right" ng-click="allEvents = [];">Clear</button>
-                </div><!-- /.box-header -->
-                <div id="full-schedule-table">
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <td>Day</td>
-                            <th ng-repeat="location in locations" ng-bind="location.name"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="dayOfWeek in daysOfWeek">
-                            <td ng-bind="dayOfWeek.value"></td>
-                            <td ng-repeat="loc in locations">
-                                <div ng-repeat="event in loc[(dayOfWeek.key)] | orderBy: 'start.dateTime'">
-                                    <span ng-bind="event.summary.split(loc.name)[0]"></span>
-                                    <span ng-bind="event.start.dateTime | date: 'h:mm'"></span>-<span ng-bind="event.end.dateTime | date: 'h:mm a'"></span>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </section>
-
-        <!-- Main content -->
-        <section class="content">
-            <label for="output">Log</label>
-            <pre id="output" ng-bind="logText"></pre>
-        </section><!-- /.content -->
-
-        <section class="content-header" ng-show="textOutput !== ''">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Text Output
-                        <button class="btn btn-default" ng-click="textOutput = '';">Clear</button>
-                    </h3>
-                </div><!-- /.box-header -->
-                <!-- form start -->
-                <form role="form">
-                    <div class="box-body">
-                        <div class="form-group">
-                            <textarea id="textOutput" ng-bind="textOutput" class="form-control"
-                                      style="height:150px;"></textarea>
-                        </div>
-                    </div><!-- /.box-body -->
-
-                </form>
-            </div>
-
-        </section>
 
     </div><!-- /.content-wrapper -->
 
@@ -343,7 +115,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
          immediately after the control sidebar -->
     <div class="control-sidebar-bg"></div>
 </div><!-- ./wrapper -->
-
 <!-- REQUIRED JS SCRIPTS -->
 
 <!-- AdminLTE App -->
@@ -354,6 +125,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <script src="bower_components/angular-animate/angular-animate.min.js"></script>
 <script src="bower_components/angular-googleapi/src/angular-googleapi.js"></script>
 <script src="bower_components/moment/min/moment-with-locales.js"></script>
+<script src="bower_components/fullcalendar/dist/fullcalendar.js"></script>
+<script src="bower_components/fullcalendar/dist/gcal.js"></script>
 <script src="dist/js/app.js"></script>
 <script src="js/fileSaver.js"></script>
 <script src="js/app.js"></script>
