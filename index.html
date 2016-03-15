@@ -269,6 +269,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <div class="box box-primary">
                 <div class="box-header with-border">
                     <h3 class="box-title">Full Schedule Export </h3>
+                    <a class="fa fa-chevron-left" ng-click="previousWeek(exportFullSchedule);"></a><span class="">March 13 - March 20</span><a class="fa fa-chevron-right" ng-click="nextWeek(exportFullSchedule);"></a>
                     <button class="btn btn-success pull-right" ng-click="exportData('full-schedule-table')">Export .xls
                     </button>
                     <button class="btn btn-default pull-right" ng-click="allEvents = [];">Clear</button>

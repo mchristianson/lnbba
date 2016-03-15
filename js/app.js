@@ -71,6 +71,10 @@
             {
                 name: 'JFK',
                 address: 'JFK Elementary, Holyoke Avenue, Lakeville, MN, United States'
+            },
+            {
+                name: 'Lake Marion',
+                address: 'Lake Marion Elementary School, Dodd Boulevard, Lakeville, MN, United States'
             }];
         $scope.logText = "";
         var appendToLog = function (string) {
@@ -216,11 +220,11 @@
         var addEvents = function (calName, events) {
             _.each(events, function (event) {
                 var eventDate = moment(event.start.dateTime).format('MMDDYYYY');
-                //console.log("event : %o", event);
-                //console.log("event : %o", event.summary);
-                //console.log("calName : %o", calName);
+                console.log("event : %o", event);
+                console.log("event : %o", event.summary);
+                console.log("calName : %o", calName);
                 var location = event.summary.split(calName)[1];
-                //console.log("location : %o", location);
+                console.log("location : %o", location);
                 if (!!location) {
                     var locObj = _.find(locations, function (loc) {
                         return loc.name === location.trim();
@@ -243,10 +247,21 @@
         }
         $scope.daysOfWeek = daysOfWeek;
 
+        $scope.week = 0;
+        $scope.previousWeek = function (success) {
+            $scope.week = $scope.week - 7;
+            success();
+        };
+        $scope.nextWeek = function (success) {
+            $scope.week = $scope.week + 7;
+            success();
+        };
         var getEvents = function (cal) {
+
+            console.log("cal : %o", cal.summary);
             googleCalendar.listEvents({
                 'calendarId': cal.id,
-                'timeMin': (moment().day(0)).toISOString(),
+                'timeMin': (moment().day($scope.week)).toISOString(),
                 'showDeleted': false,
                 'singleEvents': true,
                 'orderBy': 'startTime'
@@ -259,19 +274,20 @@
         var hasExported = false;
         $scope.exportFullSchedule = function () {
             $scope.changePage('fullSchedule');
-            if (!hasExported) {
+            console.log("exporting full schedule : %o");
+            //if (!hasExported) {
                 googleCalendar.listCalendars().then(function(cals) {
                     _.each(cals, _.partial(getEvents));
                 });
-            }
+            //}
             hasExported = true;
         };
 
-        var sunday = moment().day(7).format('YYYYMMDD'),
-            saturday = moment().day(13).format('YYYYMMDD'),
+        var sunday = moment().day($scope.week).format('YYYYMMDD'),
+            saturday = moment().day($scope.week + 6).format('YYYYMMDD'),
             datesParam = '&dates=' + sunday + '%2F' + saturday;
 
-        $scope.nextWeekSchedule = 'https://calendar.google.com/calendar/embed?title=Lakeville%20Basketball%20Practice%20Schedule&mode=WEEK&height=600&wkst=1&bgcolor=%23FFFFFF&src=lakevillebbschedule%40gmail.com&color=%23ffffff&src=7sg33utncqffm35mprq106p50k%40group.calendar.google.com&color=%236B3304&src=g6lccaup2fqmnne5velmn1h06c%40group.calendar.google.com&color=%23AB8B00&src=8m1rb8je401jtajnp48inalqak%40group.calendar.google.com&color=%2328754E&src=0n31vkpkpo5arg2hb43use6nps%40group.calendar.google.com&color=%235F6B02&src=6u1bif4vfi2531o53vrq5hte20%40group.calendar.google.com&color=%2328754E&src=msd7sbakh6g0pflbm9eo4qskhs%40group.calendar.google.com&color=%236B3304&src=uapge6e7ktifet5o6n5cd6lj58%40group.calendar.google.com&color=%238D6F47&src=6839kiho0o4v334p42tmkevar4%40group.calendar.google.com&color=%23125A12&src=usoanmeifcgf210p481l9td4g4%40group.calendar.google.com&color=%23875509&src=v75qgghiakpuo1l31valcnuk04%40group.calendar.google.com&color=%2323164E&src=rpub6jv4uobso7hgqua4qdlda8%40group.calendar.google.com&color=%2328754E&src=qft4f3s8tninudi4derahdv9fk%40group.calendar.google.com&color=%23B1440E&src=7fj0hi35sdrgceo84gu22g3qlc%40group.calendar.google.com&color=%235229A3&src=e9pvighpcg9gfrjna9joemjhu8%40group.calendar.google.com&color=%2328754E&ctz=America%2FChicago' + datesParam;
+        $scope.nextWeekSchedule = 'https://calendar.google.com/calendar/embed?title=Lakeville%20North%20Basketball%20Schedule&mode=WEEK&height=600&wkst=1&bgcolor=%23FFFFFF&src=lakevillebbschedule%40gmail.com&color=%23ffffff&src=175th89oaa2jv895lhvr901l5c%40group.calendar.google.com&color=%232F6309&src=7sg33utncqffm35mprq106p50k%40group.calendar.google.com&color=%236B3304&src=g6lccaup2fqmnne5velmn1h06c%40group.calendar.google.com&color=%23AB8B00&src=8m1rb8je401jtajnp48inalqak%40group.calendar.google.com&color=%2328754E&src=0n31vkpkpo5arg2hb43use6nps%40group.calendar.google.com&color=%235F6B02&src=6u1bif4vfi2531o53vrq5hte20%40group.calendar.google.com&color=%2328754E&src=uapge6e7ktifet5o6n5cd6lj58%40group.calendar.google.com&color=%238D6F47&src=6839kiho0o4v334p42tmkevar4%40group.calendar.google.com&color=%23125A12&src=usoanmeifcgf210p481l9td4g4%40group.calendar.google.com&color=%23875509&src=v75qgghiakpuo1l31valcnuk04%40group.calendar.google.com&color=%2323164E&src=7fj0hi35sdrgceo84gu22g3qlc%40group.calendar.google.com&color=%235229A3&src=j74lst0uve4ma8m0rt3ip20ee8%40group.calendar.google.com&color=%23AB8B00&ctz=America%2FChicago' + datesParam;
 
         $scope.exportData = function (tableId) {
             var blob = new Blob([document.getElementById(tableId).innerHTML], {
