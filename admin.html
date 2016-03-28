@@ -287,7 +287,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             <td ng-bind="dayOfWeek.value"></td>
                             <td ng-repeat="loc in locations">
                                 <div ng-repeat="event in loc[(dayOfWeek.key)] | orderBy: 'start.dateTime'">
-                                    <span ng-bind="event.summary.split(loc.name)[0]"></span>
+                                    <span ng-bind="getSummary(event, loc.name)"></span>
                                     <span ng-bind="event.start.dateTime | date: 'h:mm'"></span>-<span ng-bind="event.end.dateTime | date: 'h:mm a'"></span>
                                 </div>
                             </td>

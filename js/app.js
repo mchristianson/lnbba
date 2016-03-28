@@ -18,7 +18,7 @@
         $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     });
 
-    module.controller('LnbbaCtrl', function ($scope, $log, $q, $timeout, $window, $filter, googleLogin, googleCalendar, googlePlus) {
+    module.controller('LnbbaCtrl', function ($scope, $log, $q, $timeout, $window, $filter, $location, googleLogin, googleCalendar, googlePlus) {
 
         $scope.quickAddText = "Monday, 3/14 LNHS South Gym      6:30 to 8:00pm";
 
@@ -160,9 +160,13 @@
         };
 
         var quickAdd = function (str) {
+            var calendar = str.split('|')[1].trim(),
+                quickAddText= str.split('|')[0].trim();
+            var cal = _.find($scope.allCalendars, {summary: calendar});
+            console.log("cal : %o", cal);
             googleCalendar.createEvent({
-                calendarId: 'primary',
-                text: str
+                calendarId: cal.googleCalendarId,
+                text: quickAddText
             }).then(function(event) {
                 console.log("event : %o", event);
                 appendToLog('Event created: ');
@@ -213,6 +217,9 @@
                             'orderBy': 'startTime'
 
                         }).then(function (events) {
+                            console.log("cal.summary : %o", cal.summary);
+                            console.log("events : %o", events);
+
                             _.each(events, function (event) {
                                 $scope.displayEvents.push(event);
                             });
@@ -224,6 +231,17 @@
 
         };
 
+        $scope.getLocation = function (calName, summary) {
+            var location = event.summary.split(calName)[1];
+            if (!location) location = event.summary;
+            return location;
+        };
+
+        $scope.getSummary = function (event, location) {
+            var summary = event.summary.split(location)[0];
+            return !!summary ? summary : 'Open: ';
+        };
+
         var addEvents = function (calName, events) {
             _.each(events, function (event) {
                 var eventDate = moment(event.start.dateTime).format('MMDDYYYY');
@@ -232,14 +250,18 @@
                 console.log("calName : %o", calName);
                 var location = event.summary.split(calName)[1];
                 console.log("location : %o", location);
+                if (!location) location = event.summary;
+                console.log("location 2: %o", location);
                 if (!!location) {
                     var locObj = _.find(locations, function (loc) {
                         return loc.name === location.trim();
                     });
-                    if (!!locObj[eventDate]) {
-                        locObj[eventDate].push(event);
-                    } else {
-                        locObj[eventDate] = [event];
+                    if (!!locObj) {
+                        if (!!locObj[eventDate]) {
+                            locObj[eventDate].push(event);
+                        } else {
+                            locObj[eventDate] = [event];
+                        }
                     }
                 }
             });
@@ -254,7 +276,7 @@
         }
         $scope.daysOfWeek = daysOfWeek;
 
-        $scope.week = 0;
+        $scope.week = 7;
         $scope.previousWeek = function (success) {
             $scope.week = $scope.week - 7;
             success();
@@ -318,20 +340,26 @@
 
         var calendar = $('#calendar');
 
+        var selectedTeam = $scope.selectedTeam = $location.search().team;
+
         $scope.allCalendars = [
-            {  summary: '1 WOTN', googleCalendarId: '175th89oaa2jv895lhvr901l5c@group.calendar.google.com', color: '#2F6309', visible: true},
-            {  summary: 'Open', googleCalendarId: 'lakevillebbschedule@gmail.com', color: '#eeeeee', visible: true},
-            {  summary: '4B Heggen', googleCalendarId: '0n31vkpkpo5arg2hb43use6nps@group.calendar.google.com', color: '#5F6B02', visible: true},
-            {  summary: '6C Hunhoff', googleCalendarId: 'v75qgghiakpuo1l31valcnuk04@group.calendar.google.com', color: '#23164E', visible: true},
-            {  summary: '6A Winter', googleCalendarId: '6839kiho0o4v334p42tmkevar4@group.calendar.google.com', color: '#125A12', visible: true},
-            {  summary: '8BB (Black) Lang', googleCalendarId: '7fj0hi35sdrgceo84gu22g3qlc@group.calendar.google.com', color: '#dd8899', visible: true},
-            {  summary: '3A Kohlander', googleCalendarId: '7sg33utncqffm35mprq106p50k@group.calendar.google.com', color: '#6B3304', visible: true},
-            {  summary: '4A Christianson', googleCalendarId: '8m1rb8je401jtajnp48inalqak@group.calendar.google.com', color: '#28754E', visible: true},
-            {  summary: '6B Falter', googleCalendarId: 'usoanmeifcgf210p481l9td4g4@group.calendar.google.com', color: '#875509', visible: true},
-            {  summary: '3G Johnson', googleCalendarId: 'g6lccaup2fqmnne5velmn1h06c@group.calendar.google.com', color: '#AB8B00', visible: true},
-            {  summary: '5C Angell', googleCalendarId: 'uapge6e7ktifet5o6n5cd6lj58@group.calendar.google.com', color: '#8D6F47', visible: true},
-            {  summary: '5 Wheatcraft', googleCalendarId: '6u1bif4vfi2531o53vrq5hte20@group.calendar.google.com', color: '#28754E', visible: true},
-            {  summary: '8BR (Red) Hernandez', googleCalendarId: 'j74lst0uve4ma8m0rt3ip20ee8@group.calendar.google.com', color: '#5229A3', visible: true}
+            {  summary: '1 WOTN', googleCalendarId: '175th89oaa2jv895lhvr901l5c@group.calendar.google.com', color: '#2F6309', visible: !selectedTeam},
+            {  summary: 'Open', googleCalendarId: 'lakevillebbschedule@gmail.com', color: '#eeeeee', visible: !selectedTeam},
+            {  summary: '4B Heggen', googleCalendarId: '0n31vkpkpo5arg2hb43use6nps@group.calendar.google.com', color: '#5F6B02', visible: !selectedTeam},
+            {  summary: '6C Hunhoff', googleCalendarId: 'v75qgghiakpuo1l31valcnuk04@group.calendar.google.com', color: '#23164E', visible: !selectedTeam},
+            {  summary: '5S Winter', googleCalendarId: '6839kiho0o4v334p42tmkevar4@group.calendar.google.com', color: '#125A12', visible: !selectedTeam},
+            {  summary: '8BB (Black) Lang', googleCalendarId: '7fj0hi35sdrgceo84gu22g3qlc@group.calendar.google.com', color: '#dd8899', visible: !selectedTeam},
+            {  summary: '3A Kohlander', googleCalendarId: '7sg33utncqffm35mprq106p50k@group.calendar.google.com', color: '#6B3304', visible: !selectedTeam},
+            {  summary: '4A Christianson', googleCalendarId: '8m1rb8je401jtajnp48inalqak@group.calendar.google.com', color: '#28754E', visible: !selectedTeam},
+            {  summary: '6B Falter', googleCalendarId: 'usoanmeifcgf210p481l9td4g4@group.calendar.google.com', color: '#875509', visible: !selectedTeam},
+            {  summary: '3G Johnson', googleCalendarId: 'g6lccaup2fqmnne5velmn1h06c@group.calendar.google.com', color: '#AB8B00', visible: !selectedTeam},
+            {  summary: '5C Angell', googleCalendarId: 'uapge6e7ktifet5o6n5cd6lj58@group.calendar.google.com', color: '#8D6F47', visible: !selectedTeam},
+            {  summary: '5 Wheatcraft', googleCalendarId: '6u1bif4vfi2531o53vrq5hte20@group.calendar.google.com', color: '#28754E', visible: !selectedTeam},
+            {  summary: '8BR (Red) Hernandez', googleCalendarId: 'j74lst0uve4ma8m0rt3ip20ee8@group.calendar.google.com', color: '#5229A3', visible: !selectedTeam},
+            {  summary: 'Girls - 5 Dahl', googleCalendarId: 'rlj3ce7fchvmc61aot14lh7aa4@group.calendar.google.com', color: '#f691b2', visible: !selectedTeam},
+            {  summary: 'Girls - 5 Kelly', googleCalendarId: '6ecodd1g5ecckcrv4t7b743bak@group.calendar.google.com', color: '#ac725e', visible: !selectedTeam},
+            {  summary: 'Girls - 6 Galles', googleCalendarId: 'lmp1l5qma837cf79v0vk0sgfak@group.calendar.google.com', color: '#fa573c', visible: !selectedTeam},
+            {  summary: 'Girls - 5 Plotnik', googleCalendarId: '3c4iega731hmopmf53vifaphrs@group.calendar.google.com', color: '#cabdbf', visible: !selectedTeam}
          ];
         var visibleCalendars = _.pick( $scope.allCalendars, 'googleCalendarId');
 
@@ -344,6 +372,7 @@
             }
 
         };
+
         $scope.initCalendarView = function () {
             calendar.fullCalendar({
                 googleCalendarApiKey: 'AIzaSyB3ry0B-bKSXl45V29ac1bferwySUC8d80',
@@ -359,27 +388,49 @@
                     week: 'week',
                     day: 'day'
                 },
-                eventSources: $scope.allCalendars
+                minTime: '08:00:00',
+                maxTime: '24:00:00',
+                scrollTime: '16:00:00',
+                slotDuration: '00:15:00',
+                eventSources: getEventSources($scope.allCalendars)
             });
         };
+
+
+        var getEventSources = function () {
+            if (!!selectedTeam) {
+                var cal = _.find($scope.allCalendars, {summary: selectedTeam});
+                cal.visible = true;
+                return cal;
+            } else {
+                return $scope.allCalendars;
+            }
+
+        };
         $scope.showOnly = function (cal) {
-            _.each($scope.allCalendars, function (theCal) {
-                theCal.visible = false;
-                calendar.fullCalendar('removeEventSource',  theCal);
-            });
-            cal.visible = true;
-            calendar.fullCalendar('addEventSource',  cal);
+            window.location.href = '/#/?team=' + cal.summary;
+            window.location.reload();
+            //
+            //_.each($scope.allCalendars, function (theCal) {
+            //    theCal.visible = false;
+            //    calendar.fullCalendar('removeEventSource',  theCal);
+            //});
+            //cal.visible = true;
+            //calendar.fullCalendar('addEventSource',  cal);
         };
 
         $scope.isCalActive = function (calId) {
             return (visibleCalendars.indexOf(calId) > -1);
-        }
+        };
+
+        $scope.showIcal = function (cal) {
+            var calAddress = 'https://calendar.google.com/calendar/ical/'+cal.googleCalendarId.replace('@', '%40')+'/public/basic.ics';
+            window.prompt("Please use the following address to access your calendar from other applications. You can copy and paste this into any calendar product that supports the iCal format.",
+                calAddress, "OK");
+        };
+
+
+
     });
-    var removeFromArray = function (array, item) {
-        var i = array.indexOf(item);
-        if(i != -1) {
-            array.splice(i, 1);
-        }
-    };
 
 })();

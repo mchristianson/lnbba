@@ -520,6 +520,7 @@ function _init() {
       });
     },
     _fixForContent: function (sidebar) {
+      console.log("sidebar.height() : %o", sidebar.height());
       $(".content-wrapper, .right-side").css('min-height', sidebar.height());
     }
   };
