@@ -50,7 +50,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <a href="index2.html" class="logo">
             Lakeville North
         </a>
-
         <!-- Header Navbar -->
         <nav class="navbar navbar-static-top" role="navigation">
             <!-- Sidebar toggle button-->
@@ -131,16 +130,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <ul class="sidebar-menu">
                 <li class="header">OPTIONS</li>
                 <!-- Optionally, you can add icons to the links -->
-                <li class="treeview">
-                    <a href="#"><i class="fa fa-fighter-jet"></i> <span>Quick Add</span><i class="fa fa-angle-left pull-right"></i></a>
-                    <ul class="treeview-menu">
-                        <li ng-class="{'active' : !!displayQuickAdd}"><a href="#" ng-click="changePage('quickAdd')"><i
-                                class="fa fa-table"></i> <span>Quick Add Form</span></a></li>
-                        <li><a target="_blank"
-                               href="https://docs.google.com/spreadsheets/d/1LOuCHk-DgDQRioZmponalhGpPLQljTKJeOcmWST4pHI/edit#gid=0"><i
-                                class="fa fa-file-excel-o"></i> <span>Quick Add Spreadsheet</span></a></li>
-                    </ul>
-                </li>
+                <li><a href="#" ng-click="changePage('quickAdd')"><i class="fa fa-fighter-jet"></i>
+                    <span>Quick Add</span></a></li>
+                <li><a target="_blank"
+                       href="https://docs.google.com/spreadsheets/d/1OzVJdCNJT7EjVMwOPY026em473aTtb4gqB8Td_rxJF4/edit#gid=1991187348"><i
+                        class="fa fa-file-excel-o"></i> <span>Quick Add Spreadsheet</span></a></li>
+
+                <li><a href="#" ng-click="updateEventNames()"><i class="fa fa-refresh"></i>
+                    <span>Update Events</span></a></li>
+
+                <li ng-class="{'active' : !!displayPage.sportNgin}"><a href="#" ng-click="exportToSportNgin()"><i
+                    class="fa fa-futbol-o"></i> <span>Export to Sport Ngin</span></a></li>
+
                 <li class="trueeview">
                     <a href="#"><i class="fa fa-file-excel-o"></i><span>Export Data</span><i class="fa fa-angle-left pull-right"></i></a>
                     <ul class="treeview-menu">
@@ -148,24 +149,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 class="fa fa-clock-o"></i> <span>Export Open Times</span></a></li>
                         <li ng-class="{'active' : !!displayPage.fullSchedule}"><a href="#" ng-click="exportFullSchedule()"><i
                                 class="fa fa-calendar"></i> <span>Export Full Schedule</span></a></li>
-                        <li ng-class="{'active' : !!displayPage.sportNgin}"><a href="#" ng-click="exportToSportNgin()"><i
-                                class="fa fa-futbol-o"></i> <span>Export to Sport Ngin</span></a></li>
                     </ul>
                 </li>
 
-                <li><a href="#" ng-click="updateEventNames()"><i class="fa fa-refresh"></i>
-                    <span>Update Events</span></a></li>
                 <li><a target="_blank" href="https://calendar.google.com/calendar/"><i class="fa fa-calendar"></i>
                     <span>View Calendar</span></a></li>
-                <li><a target="_blank" ng-href="{{ nextWeekSchedule }}"><i class="fa fa-calendar-check-o"></i> <span>Next Week Calendar</span></a></li>
-                <li><a target="_blank"
-                       href="https://calendar.google.com/calendar/embedhelper?src=lakevillebbschedule%40gmail.com&ctz=America/Chicago"><i
-                        class="fa fa-print"></i> <span>Calendar Embed</span></a></li>
-                <li><a target="_blank" href="https://www.gcal2excel.com/exporter#template"><i
-                        class="fa fa-file-excel-o"></i> <span>Calendar To Excel</span></a></li>
-                <li><a target="_blank"
-                       href="https://docs.google.com/spreadsheets/d/1GrQ0EEMbb5ztkDNHivkWwfQtwCb-pE2J-jWgjEcJvxg/edit#gid=0"><i
-                        class="fa fa-asterisk"></i> <span>Special Requests</span></a></li>
                 <li><a target="_blank"
                        href="https://docs.google.com/document/d/1cxu33Siud7L03lOPrk3LPcYOSCnRPg_oF0L1Ihdn_Ik/edit#heading=h.de4u357wg3av"><i
                         class="fa fa-graduation-cap"></i> <span>Instructions</span></a></li>
@@ -208,22 +196,37 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     </button>
                     <button class="btn btn-default pull-right" ng-click="displayEvents = [];">Clear</button>
                 </div><!-- /.box-header -->
+
+
                 <div id="sport-ngin-table">
+
                     <table class="table table-striped">
                         <thead>
                         <tr>
-                            <th>Start_Date_Time</th>
-                            <th>End_Date_Time</th>
+                            <th><a href="#" ng-click="sortType = 'start.dateTime'; sortReverse = !sortReverse">
+                                    Start_Date_Time
+                                    <span ng-show="sortType == 'start.dateTime'" class="fa fa-caret-down"></span>
+                                </a></th>
+                            <th><a href="#" ng-click="sortType = 'end.dateTime'; sortReverse = !sortReverse">
+                                End_Date_Time
+                                    <span ng-show="sortType == 'end.dateTime'" class="fa fa-caret-down"></span>
+                                </a></th>
                             <th>Title</th>
-                            <th>Location</th>
-                            <th>Team1_ID</th>
+                            <th><a href="#" ng-click="sortType = 'location'; sortReverse = !sortReverse">
+                                Location
+                                    <span ng-show="sortType == 'location'" class="fa fa-caret-down"></span>
+                                </a></th>
+                            <th><a href="#" ng-click="sortType = 'description'; sortReverse = !sortReverse">
+                                Team1_ID_Time
+                                    <span ng-show="sortType == 'description'" class="fa fa-caret-down"></span>
+                                </a></th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr ng-repeat="event in displayEvents">
+                        <tr ng-repeat="event in displayEvents | orderBy:sortType:sortReverse">
                             <td ng-bind="event.start.dateTime | date: 'MM/dd/yyyy h:mm a'"></td>
                             <td ng-bind="event.end.dateTime | date: 'MM/dd/yyyy h:mm a'"></td>
-                            <td ng-bind="event.summary"></td>
+                            <td ng-bind="getExportTitle(event)"></td>
                             <td ng-bind="event.location"></td>
                             <td ng-bind="event.description"></td>
                         </tr>
@@ -351,6 +354,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <script src="bower_components/jquery/dist/jquery.min.js"></script>
 <script src="bower_components/angular/angular.min.js"></script>
 <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
+<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 <script src="bower_components/angular-animate/angular-animate.min.js"></script>
 <script src="bower_components/angular-googleapi/src/angular-googleapi.js"></script>
 <script src="bower_components/moment/min/moment-with-locales.js"></script>

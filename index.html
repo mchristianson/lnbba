@@ -63,7 +63,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <header class="main-header">
 
         <!-- Logo -->
-        <a href="index2.html" class="logo">
+        <a href="index.html" class="logo">
             Lakeville North
         </a>
 
@@ -107,6 +107,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             <span class="label label-success only-link" ng-click="showOnly(cal)">only</span>
                             <span class="label label-warning ical-link" ng-click="showIcal(cal)">i</span>
                         </span>
+                    </a>
+                </li>
+
+                <li class="header">GYMS</li>
+                <!-- Optionally, you can add icons to the links -->
+                <li ng-repeat="gym in locations | orderBy: 'name'">
+                    <a ng-click="showGym(gym)">
+                        <i class="fa fa-building-o"></i>
+                        <span ng-bind="gym.name"></span>
                     </a>
                 </li>
 

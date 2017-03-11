@@ -18,73 +18,106 @@
         $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
     });
 
-    module.controller('LnbbaCtrl', function ($scope, $log, $q, $timeout, $window, $filter, $location, googleLogin, googleCalendar, googlePlus) {
+    module.controller('LnbbaCtrl', function ($scope, $log, $q, $timeout, $window, $filter, $location, $http, googleLogin, googleCalendar, googlePlus) {
 
         $scope.quickAddText = "Monday, 3/14 LNHS South Gym      6:30 to 8:00pm";
 
+        var origLocations = function () {
+            return [
+                {
+                    name: 'LNHS South Gym',
+                    address: 'Lakeville North High School, Ipava Avenue, Lakeville, MN, United States',
+                    abbr: 'LNHS South'
+                },
 
-        var locations = $scope.locations = [
-            {
-                name: 'LNHS South Gym',
-                address: 'Lakeville North High School, Ipava Avenue, Lakeville, MN, United States'
-            },
+                {
+                    name: 'LNHS North Gym',
+                    address: 'Lakeville North High School, Ipava Avenue, Lakeville, MN, United States',
+                    abbr: 'LNHS North'
+                },
+                {
+                    name: 'Kenwood',
+                    address: 'Kenwood Trail Middle School, Kenwood Trail, Lakeville, MN, United States',
+                    abbr: 'KTMS'
+                },
+                {
+                    name: 'Oak Hills',
+                    address: 'Oak Hills Elementary School, 165th Street West, Lakeville, MN, United States',
+                    abbr: 'OHE'
+                },
+                {
+                    name: 'Century',
+                    address: 'Century Middle School, Ipava Avenue, Lakeville, MN, United States',
+                    abbr: 'CMS'
+                },
+                {
+                    name: 'Century Aux',
+                    address: 'Century Middle School, Ipava Avenue, Lakeville, MN, United States',
+                    abbr: 'CMS Aux'
+                },
+                {
+                    name: 'Crystal Lake',
+                    address: 'Crystal Lake Education Center, Ipava Avenue, Lakeville, MN, United States',
+                    abbr: 'CLEC'
+                },
+                {
+                    name: 'Eastview',
+                    address: 'Eastview Elementary School, Ipava Avenue, Lakeville, MN, United States',
+                    abbr: 'EVE'
+                },
+                {
+                    name: 'Cherryview',
+                    address: 'Cherry View Elementary School, 175th Street West, Lakeville, MN, United States',
+                    abbr: 'CVE'
+                },
+                {
+                    name: 'Lakeview',
+                    address: 'Lakeview Elementary School, Jacquard Avenue, Lakeville, MN, United States',
+                    abbr: 'LVE'
+                },
+                {
+                    name: 'Orchard Lake',
+                    address: 'Orchard Lake Elementary School, Klamath Trail, Lakeville, MN, United States',
+                    abbr: 'OLE'
+                },
+                {
+                    name: 'JFK',
+                    address: 'JFK Elementary, Holyoke Avenue, Lakeville, MN, United States',
+                    abbr: 'JFK'
+                },
+                {
+                    name: 'Christina Huddleston',
+                    address: 'Christina Huddleston Elementary School, 175th Street West, Lakeville, MN, United States',
+                    abbr: 'CHE'
+                },
+                {
+                    name: 'WOTN',
+                    address: 'Wear Out The Net, 9913 214th St W E, Lakeville, MN, United States',
+                    abbr: 'WOTN'
+                },
+                {
+                    name: 'Lake Marion',
+                    address: 'Lake Marion Elementary School, Dodd Boulevard, Lakeville, MN, United States',
+                    abbr: 'LME'
+                }];
+        };
 
-            {
-                name: 'LNHS North Gym',
-                address: 'Lakeville North High School, Ipava Avenue, Lakeville, MN, United States'
-            },
-            {
-                name: 'Kenwood',
-                address: 'Kenwood Trail Middle School, Kenwood Trail, Lakeville, MN, United States'
-            },
-            {
-                name: 'Oak Hills',
-                address: 'Oak Hills Elementary School, 165th Street West, Lakeville, MN, United States'
-            },
-            {
-                name: 'Century',
-                address: 'Century Middle School, Ipava Avenue, Lakeville, MN, United States'
-            },
-            {
-                name: 'Century Aux',
-                address: 'Century Middle School, Ipava Avenue, Lakeville, MN, United States'
-            },
-            {
-                name: 'Crystal Lake',
-                address: 'Crystal Lake Education Center, Ipava Avenue, Lakeville, MN, United States'
-            },
-            {
-                name: 'Eastview',
-                address: 'Eastview Elementary School, Ipava Avenue, Lakeville, MN, United States'
-            },
-            {
-                name: 'Cherryview',
-                address: 'Cherry View Elementary School, 175th Street West, Lakeville, MN, United States'
-            },
-            {
-                name: 'Lakeview',
-                address: 'Lakeview Elementary School, Jacquard Avenue, Lakeville, MN, United States'
-            },
-            {
-                name: 'Orchard Lake',
-                address: 'Orchard Lake Elementary School, Klamath Trail, Lakeville, MN, United States'
-            },
-            {
-                name: 'JFK',
-                address: 'JFK Elementary, Holyoke Avenue, Lakeville, MN, United States'
-            },
-            {
-                name: 'Lake Marion',
-                address: 'Lake Marion Elementary School, Dodd Boulevard, Lakeville, MN, United States'
-            }];
+        var locations = $scope.locations = origLocations();
+
+        $scope.getExportTitle = function (event) {
+            var loc = _.find(locations, function (location) {
+                return event.summary.indexOf(location.name) > -1;
+            });
+            return event.description + ' Practice' + ' @ ' + loc.abbr;
+        };
         $scope.logText = "";
         var appendToLog = function (string) {
-            $scope.logText += '\n' + string;
+            $scope.logText = string + '\n' + $scope.logText;
         };
 
         $scope.textOutput = "";
         var appendToTextOutput = function (string) {
-            $scope.textOutput += '\n' + string;
+            $scope.textOutput = string + '\n' + $scope.textOutput;
         };
 
         $scope.login = function () {
@@ -157,6 +190,9 @@
 
         $scope.quickAdd = function () {
             _.each($scope.quickAddText.split('\n'), quickAdd);
+            $timeout(function () {
+                $scope.updateEventNames();
+            }, 1000);
         };
 
         var quickAdd = function (str) {
@@ -197,6 +233,7 @@
 
             }).then(function (events) {
                 _.each(events, function (event) {
+                    console.log("event : %o", event);
                     $scope.displayEvents.push(event);
                 });
             });
@@ -290,7 +327,6 @@
             console.log("cal : %o", cal.summary);
             googleCalendar.listEvents({
                 'calendarId': cal.id,
-                'timeMin': (moment().day($scope.week)).toISOString(),
                 'showDeleted': false,
                 'singleEvents': true,
                 'orderBy': 'startTime'
@@ -305,9 +341,10 @@
             $scope.changePage('fullSchedule');
             console.log("exporting full schedule : %o");
             //if (!hasExported) {
-                googleCalendar.listCalendars().then(function(cals) {
-                    _.each(cals, _.partial(getEvents));
-                });
+            locations = $scope.locations = origLocations();
+            googleCalendar.listCalendars().then(function(cals) {
+                _.each(cals, _.partial(getEvents));
+            });
             //}
             hasExported = true;
         };
@@ -341,26 +378,42 @@
         var calendar = $('#calendar');
 
         var selectedTeam = $scope.selectedTeam = $location.search().team;
+        var selectedGym = $location.search().gym;
+        if (!!selectedGym) {
+            selectedGym = _.find($scope.locations, {name: selectedGym});
+        }
 
         $scope.allCalendars = [
-            {  summary: '1 WOTN', googleCalendarId: '175th89oaa2jv895lhvr901l5c@group.calendar.google.com', color: '#2F6309', visible: !selectedTeam},
-            {  summary: 'Open', googleCalendarId: 'lakevillebbschedule@gmail.com', color: '#eeeeee', visible: !selectedTeam},
-            {  summary: '4B Heggen', googleCalendarId: '0n31vkpkpo5arg2hb43use6nps@group.calendar.google.com', color: '#5F6B02', visible: !selectedTeam},
-            {  summary: '6C Hunhoff', googleCalendarId: 'v75qgghiakpuo1l31valcnuk04@group.calendar.google.com', color: '#23164E', visible: !selectedTeam},
-            {  summary: '5S Winter', googleCalendarId: '6839kiho0o4v334p42tmkevar4@group.calendar.google.com', color: '#125A12', visible: !selectedTeam},
-            {  summary: '8BB (Black) Lang', googleCalendarId: '7fj0hi35sdrgceo84gu22g3qlc@group.calendar.google.com', color: '#dd8899', visible: !selectedTeam},
-            {  summary: '3A Kohlander', googleCalendarId: '7sg33utncqffm35mprq106p50k@group.calendar.google.com', color: '#6B3304', visible: !selectedTeam},
-            {  summary: '4A Christianson', googleCalendarId: '8m1rb8je401jtajnp48inalqak@group.calendar.google.com', color: '#28754E', visible: !selectedTeam},
-            {  summary: '6B Falter', googleCalendarId: 'usoanmeifcgf210p481l9td4g4@group.calendar.google.com', color: '#875509', visible: !selectedTeam},
-            {  summary: '3G Johnson', googleCalendarId: 'g6lccaup2fqmnne5velmn1h06c@group.calendar.google.com', color: '#AB8B00', visible: !selectedTeam},
-            {  summary: '5C Angell', googleCalendarId: 'uapge6e7ktifet5o6n5cd6lj58@group.calendar.google.com', color: '#8D6F47', visible: !selectedTeam},
-            {  summary: '5 Wheatcraft', googleCalendarId: '6u1bif4vfi2531o53vrq5hte20@group.calendar.google.com', color: '#28754E', visible: !selectedTeam},
-            {  summary: '8BR (Red) Hernandez', googleCalendarId: 'j74lst0uve4ma8m0rt3ip20ee8@group.calendar.google.com', color: '#5229A3', visible: !selectedTeam},
-            {  summary: 'Girls - 5 Dahl', googleCalendarId: 'rlj3ce7fchvmc61aot14lh7aa4@group.calendar.google.com', color: '#f691b2', visible: !selectedTeam},
-            {  summary: 'Girls - 5 Kelly', googleCalendarId: '6ecodd1g5ecckcrv4t7b743bak@group.calendar.google.com', color: '#ac725e', visible: !selectedTeam},
-            {  summary: 'Girls - 6 Galles', googleCalendarId: 'lmp1l5qma837cf79v0vk0sgfak@group.calendar.google.com', color: '#fa573c', visible: !selectedTeam},
-            {  summary: 'Girls - 5 Plotnik', googleCalendarId: '3c4iega731hmopmf53vifaphrs@group.calendar.google.com', color: '#cabdbf', visible: !selectedTeam}
-         ];
+            {  abbr: '4A', summary: '4A Kolander', googleCalendarId: '7sg33utncqffm35mprq106p50k@group.calendar.google.com', color: '#6B3304', visible: !selectedTeam},
+            {  abbr: '4B', summary: '4B Knight', googleCalendarId: '175th89oaa2jv895lhvr901l5c@group.calendar.google.com', color: '#2F6309', visible: !selectedTeam},
+            {  abbr: '4C', summary: '4C Smith-Larkin', googleCalendarId: 'pdal4d6bhle6fg8cs17pdegi6k@group.calendar.google.com', color: '#5A6986', visible: !selectedTeam},
+            {  abbr: '5A', summary: '5A Robison', googleCalendarId: '8m1rb8je401jtajnp48inalqak@group.calendar.google.com', color: '#28754E', visible: !selectedTeam},
+            {  abbr: '5B', summary: '5B Olson', googleCalendarId: '0n31vkpkpo5arg2hb43use6nps@group.calendar.google.com', color: '#5F6B02', visible: !selectedTeam},
+            {  abbr: '5C', summary: '5C Trish', googleCalendarId: 'g6lccaup2fqmnne5velmn1h06c@group.calendar.google.com', color: '#AB8B00', visible: !selectedTeam},
+            {  abbr: '6A', summary: '6A Nolan', googleCalendarId: '6u1bif4vfi2531o53vrq5hte20@group.calendar.google.com', color: '#28754E', visible: !selectedTeam},
+            {  abbr: '6BR', summary: '6BR Laufenberger', googleCalendarId: '0c080o6vq617ft17qihrnjr45k@group.calendar.google.com', color: '#28754E', visible: !selectedTeam},
+            {  abbr: '6BW', summary: '6BW Ritz', googleCalendarId: 'f3run7pjddhgcpd352j4m4v9i0@group.calendar.google.com', color: '#28754E', visible: !selectedTeam},
+            {  abbr: '6C', summary: '6C Angell', googleCalendarId: 'uapge6e7ktifet5o6n5cd6lj58@group.calendar.google.com', color: '#8D6F47', visible: !selectedTeam},
+            {  abbr: '7A', summary: '7A Winter', googleCalendarId: '6839kiho0o4v334p42tmkevar4@group.calendar.google.com', color: '#125A12', visible: !selectedTeam},
+            {  abbr: '7B', summary: '7B Falter', googleCalendarId: 'usoanmeifcgf210p481l9td4g4@group.calendar.google.com', color: '#875509', visible: !selectedTeam},
+            {  abbr: '7C', summary: '7C Hunhoff', googleCalendarId: 'v75qgghiakpuo1l31valcnuk04@group.calendar.google.com', color: '#23164E', visible: !selectedTeam},
+            {  abbr: '8A', summary: '8A Blasziek', googleCalendarId: '7fj0hi35sdrgceo84gu22g3qlc@group.calendar.google.com', color: '#dd8899', visible: !selectedTeam},
+            {  abbr: '8B', summary: '8B Winship', googleCalendarId: 'j74lst0uve4ma8m0rt3ip20ee8@group.calendar.google.com', color: '#5229A3', visible: !selectedTeam},
+            {  abbr: '8C', summary: '8C Schetnan', googleCalendarId: 'vf4fpo5ti39u2ulehcde8505ks@group.calendar.google.com', color: '#5229A3', visible: !selectedTeam},
+
+            {  abbr: '', summary: 'Open', googleCalendarId: 'lakevillebbschedule@gmail.com', color: '#eeeeee', visible: !selectedTeam},
+
+            {  abbr: '4red', summary: 'Girls - 4R', googleCalendarId: 'hkt2l85spp1mqu065n03cuol2s@group.calendar.google.com', color: '#f691b2', visible: !selectedTeam},
+            {  abbr: '4black', summary: 'Girls - 4B', googleCalendarId: 'qubn2mgect3dh51h5i0u3iapgs@group.calendar.google.com', color: '#f691b2', visible: !selectedTeam},
+            {  abbr: '5a16', summary: 'Girls - 5A', googleCalendarId: 'rlj3ce7fchvmc61aot14lh7aa4@group.calendar.google.com', color: '#f691b2', visible: !selectedTeam},
+            {  abbr: '5b16', summary: 'Girls - 5B', googleCalendarId: '6ecodd1g5ecckcrv4t7b743bak@group.calendar.google.com', color: '#ac725e', visible: !selectedTeam},
+            {  abbr: '5c16', summary: 'Girls - 5C', googleCalendarId: '3c4iega731hmopmf53vifaphrs@group.calendar.google.com', color: '#cabdbf', visible: !selectedTeam},
+            {  abbr: '6a16', summary: 'Girls - 6A', googleCalendarId: 'ldu2chdjrmj5jmkmhrlvlfomk8@group.calendar.google.com', color: '#cabdbf', visible: !selectedTeam},
+            {  abbr: '6b16', summary: 'Girls - 6B', googleCalendarId: 'sse6kis823j766n367buqaclsg@group.calendar.google.com', color: '#cabdbf', visible: !selectedTeam},
+            {  abbr: '7a16', summary: 'Girls - 7A Galles', googleCalendarId: 'lmp1l5qma837cf79v0vk0sgfak@group.calendar.google.com', color: '#fa573c', visible: !selectedTeam},
+            {  abbr: '8a16', summary: 'Girls - 8A', googleCalendarId: 'bud272ubu8dupc1o0le7m2up6s@group.calendar.google.com', color: '#ff7537', visible: !selectedTeam},
+            {  abbr: '8b16', summary: 'Girls - 8B', googleCalendarId: 'lmp1l5qma837cf79v0vk0sgfak@group.calendar.google.com', color: '#fa573c', visible: !selectedTeam}
+        ];
         var visibleCalendars = _.pick( $scope.allCalendars, 'googleCalendarId');
 
         $scope.toggleCalendar = function (cal) {
@@ -374,28 +427,64 @@
         };
 
         $scope.initCalendarView = function () {
-            calendar.fullCalendar({
-                googleCalendarApiKey: 'AIzaSyB3ry0B-bKSXl45V29ac1bferwySUC8d80',
-                header: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'month,agendaWeek,agendaDay'
-                },
-                defaultView: 'agendaWeek',
-                buttonText: {
-                    today: 'today',
-                    month: 'month',
-                    week: 'week',
-                    day: 'day'
-                },
-                minTime: '08:00:00',
-                maxTime: '24:00:00',
-                scrollTime: '16:00:00',
-                slotDuration: '00:15:00',
-                eventSources: getEventSources($scope.allCalendars)
+            var events = [];
+            $http.get('http://lnbba.smd-test.com/calendar_data.php').success(function (data) {
+                _.each(data, function (row) {
+                    var calendar = _.find($scope.allCalendars, function (cal) {
+                        return cal.abbr === row[4];
+                    });
+                    //if (!!calendar && (!selectedTeam || selectedTeam === calendar.summary)) {
+                    if (!!calendar) {
+                        events.push({
+                            start: moment(row[0]),
+                            end: moment(row[1]),
+                            title: row[2],
+                            backgroundColor: calendar.color,
+                            calendar: calendar
+                        });
+                    }
+                });
+                console.log(events);
+                calendar.fullCalendar({
+                    googleCalendarApiKey: 'AIzaSyB3ry0B-bKSXl45V29ac1bferwySUC8d80',
+                    header: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'month,agendaWeek,agendaDay'
+                    },
+                    defaultView: 'agendaWeek',
+                    buttonText: {
+                        today: 'today',
+                        month: 'month',
+                        week: 'week',
+                        day: 'day'
+                    },
+                    minTime: '08:00:00',
+                    maxTime: '24:00:00',
+                    scrollTime: '16:00:00',
+                    slotDuration: '00:15:00',
+//                eventSources: getEventSources($scope.allCalendars),
+                    events: events,
+                    eventRender: function(event, element) {
+                        var returnValue = true;
+                        if (!!selectedGym) {
+                            if (event.title.indexOf(selectedGym.name) === -1) {
+                                returnValue = false;
+                            }
+                        }
+                        if (!!selectedTeam && selectedTeam !== event.calendar.summary) {
+                            returnValue = false;
+                        }
+                        return returnValue;
+                    }
+                });
             });
         };
 
+        var getEventSourcesFromCsv = function () {
+            console.log(events);
+            return events;
+        };
 
         var getEventSources = function () {
             if (!!selectedTeam) {
@@ -419,6 +508,12 @@
             //calendar.fullCalendar('addEventSource',  cal);
         };
 
+        $scope.showGym = function (gym) {
+            console.log("gym : %o", gym);
+            window.location.href = '/#/?gym=' + gym.name;
+            window.location.reload();
+        };
+
         $scope.isCalActive = function (calId) {
             return (visibleCalendars.indexOf(calId) > -1);
         };
@@ -429,8 +524,32 @@
                 calAddress, "OK");
         };
 
+        $scope.sortType     = 'start.dateTime'; // set the default sort type
+        // $scope.sortType     = 'description'; // set the default sort type
+        $scope.sortReverse  = false;  // set the default sort order
 
+        $scope.dateOptions = {
+            formatYear: 'yy',
+            startingDay: 1
+        };
+        $scope.format = 'MM/dd/yyyy';
+        $scope.fromDate = new Date();
+        var nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 6);
+        $scope.toDate = nextWeek;
+        $scope.fromDatePopup = {
+            opened: false
+        };
 
+        $scope.toDatePopup = {
+            opened: false
+        };
+        $scope.openFromDate = function () {
+            $scope.fromDatePopup.opened = true;
+        };
+        $scope.openToDate = function () {
+            $scope.toDatePopup.opened = true;
+        };
     });
 
 })();
